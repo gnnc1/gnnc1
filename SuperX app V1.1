@@ -1,0 +1,104 @@
+import SwiftUI
+import Combine
+import Firebase
+
+@main
+struct SuperXApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        return true
+    }
+}
+
+class AppViewModel: ObservableObject {
+    @Published var isLoggedIn = false
+    @Published var posts: [String] = []
+    
+    func login() {
+        isLoggedIn = true
+    }
+    
+    func addPost(_ post: String) {
+        if !post.isEmpty {
+            posts.insert(post, at: 0)
+        }
+    }
+}
+
+struct ContentView: View {
+    @StateObject private var viewModel = AppViewModel()
+    
+    var body: some View {
+        NavigationView {
+            if viewModel.isLoggedIn {
+                HomeView(viewModel: viewModel)
+            } else {
+                LoginView(viewModel: viewModel)
+            }
+        }
+    }
+}
+
+struct LoginView: View {
+    @ObservedObject var viewModel: AppViewModel
+    
+    var body: some View {
+        VStack {
+            Text("SUPERX")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding()
+            Button("Login") {
+                viewModel.login()
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+    }
+}
+
+struct HomeView: View {
+    @ObservedObject var viewModel: AppViewModel
+    @State private var newPost: String = ""
+    
+    var body: some View {
+        VStack {
+            Text("SUPERX")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding()
+            TextField("What's on your mind?", text: $newPost)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            Button("Post") {
+                viewModel.addPost(newPost)
+                newPost = ""
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            List(viewModel.posts, id: \ .self) { post in
+                VStack(alignment: .leading) {
+                    Text("SUPERX")
+                        .font(.headline)
+                    Text(post)
+                        .font(.body)
+                }
+                .padding()
+            }
+        }
+    }
+}
