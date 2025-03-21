@@ -1,0 +1,91 @@
+name: SuperX app
+
+import SwiftUI
+import Firebase
+
+@main
+struct SocialMediaApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        return true
+    }
+}
+
+struct ContentView: View {
+    @State private var isLoggedIn = false
+    
+    var body: some View {
+        NavigationView {
+            if isLoggedIn {
+                HomeView()
+            } else {
+                LoginView(isLoggedIn: $isLoggedIn)
+            }
+        }
+    }
+}
+
+struct LoginView: View {
+    @Binding var isLoggedIn: Bool
+    
+    var body: some View {
+        VStack {
+            Text("Welcome to SUPERX")
+                .font(.largeTitle)
+                .padding()
+            Button("Login") {
+                isLoggedIn = true
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+    }
+}
+
+struct HomeView: View {
+    @State private var posts: [String] = []
+    @State private var newPost: String = ""
+    
+    var body: some View {
+        VStack {
+            Text("Home Feed")
+                .font(.title)
+                .padding()
+            TextField("What's on your mind?", text: $newPost)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            Button("Post") {
+                if !newPost.isEmpty {
+                    posts.insert(newPost, at: 0)
+                    newPost = ""
+                }
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            List(posts, id: \ .self) { post in
+                VStack(alignment: .leading) {
+                    Text("SUPERX")
+                        .font(.headline)
+                    Text(post)
+                        .font(.body)
+                }
+                .padding()
+            }
+        }
+    }
+}
+
